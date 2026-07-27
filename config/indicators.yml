@@ -5,10 +5,12 @@ groups:
   A_demand:
     description: Population and household trajectory
     features:
+      population: { implemented: true, note: "INSEE RP2021 population; observation, not a growth rate" }
       pop_cagr_5y: { implemented: false }
       net_migration_rate: { implemented: false }
       working_age_share_delta: { implemented: false }
-      vacancy_rate: { implemented: false }
+      working_age_share: { implemented: true, note: "exact 15-59 proxy; RP2021 bins do not isolate 60-64" }
+      vacancy_rate: { implemented: true, note: "vacant dwellings / all dwellings, percent" }
       tourism_nights_per_capita: { implemented: false }
 
   B_accessibility:
@@ -40,11 +42,11 @@ groups:
   E_valuation:
     description: Cheap RELATIVE to fundamentals, not cheap in absolute terms
     features:
-      median_price_m2: { implemented: false }
+      median_price_m2: { implemented: true, note: "annual median of canonical transaction price_per_m2" }
       price_income_ratio: { implemented: false }
       gross_yield: { implemented: false }
       peer_discount: { implemented: false, note: "vs statistically matched municipalities" }
-      annual_transactions: { implemented: false }
+      annual_transactions: { implemented: true, note: "annual count of canonical transaction rows" }
       ask_transaction_gap: { implemented: false }
 
   F_amenities:
@@ -68,3 +70,44 @@ groups:
       heat_stress_days: { implemented: false }
       water_stress: { implemented: false }
       dpe_liability_share: { implemented: false, note: "energy-performance retrofit liability" }
+
+# Runtime inputs and definitions for the first commune feature-store build.
+# These are deliberately configuration rather than code constants so a later
+# INSEE release can be substituted without changing the transformation.
+features_commune:
+  transactions_path: data/interim/transactions/transactions_34.parquet
+  output_path: data/processed/features_commune_34.parquet
+  transaction_date_column: date_mutation
+  transaction_price_column: price_per_m2
+  transaction_commune_column: code_commune
+  transaction_known_as_of_column: known_as_of
+  strict_demographic_coverage: true
+  # DVF retains this delegated commune code after its 2019 merger; the 2021
+  # INSEE tables publish its successor commune, Entre-Vignes (34246).
+  demographic_commune_code_aliases:
+    "34330": "34246"
+  insee:
+    reference_year: 2021
+    # The original RP2021 indicators were published 2024-06-27. The archive
+    # currently served by INSEE includes corrections released 2025-12-16, so
+    # that later date is the point-in-time availability date used by this build.
+    known_as_of: "2025-12-16"
+    download_timeout_seconds: 300
+    population:
+      path: data/raw/insee/base-cc-evol-struct-pop-2021_csv.zip
+      url: https://www.insee.fr/fr/statistiques/fichier/8201904/base-cc-evol-struct-pop-2021_csv.zip
+      archive_member: base-cc-evol-struct-pop-2021.CSV
+      commune_column: CODGEO
+      population_column: P21_POP
+      # The published 2021 commune base does not separate ages 60–64 from
+      # 65–74. This exact, non-imputed working-age proxy is ages 15–59.
+      working_age_columns: [P21_POP1529, P21_POP3044, P21_POP4559]
+      working_age_definition: population_15_59_share
+    housing:
+      path: data/raw/insee/base-cc-logement-2021_csv.zip
+      url: https://www.insee.fr/fr/statistiques/fichier/8202349/base-cc-logement-2021_csv.zip
+      archive_member: base-cc-logement-2021.CSV
+      commune_column: CODGEO
+      dwellings_column: P21_LOG
+      vacant_dwellings_column: P21_LOGVAC
+      vacancy_rate_unit: percent
