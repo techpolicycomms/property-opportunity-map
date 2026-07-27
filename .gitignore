@@ -23,5 +23,7 @@ outputs/geojson/
 # Notebooks checkpoint noise
 .ipynb_checkpoints/
 
+.firebase/
+
 # OS
 .DS_Store
