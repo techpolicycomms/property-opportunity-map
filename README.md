@@ -65,6 +65,12 @@ python -m pomap.ingestion.france_dvf --department 34 --years 2020 2021 2022 2023
 
 See [`pipelines/README.md`](pipelines/README.md) for the full phase plan.
 
+## Deployment
+
+The site is static. It is currently live on GitHub Pages; Firebase Hosting +
+a Namecheap custom domain is the production path, and OpenShift is parked for
+a possible future backend. Full step-by-step: [`docs/deployment.md`](docs/deployment.md).
+
 ## Multi-agent development
 
 This repository is designed to be built by a coordinated team of AI coding

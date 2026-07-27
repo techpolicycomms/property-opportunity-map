@@ -4,3 +4,4 @@
 |---|---|---|
 | 2026-07-27 | [20260727-data-dvf-34.md](20260727-data-dvf-34.md) | agent:data |
 | 2026-07-27 | [20260727-geo-commune-features.md](20260727-geo-commune-features.md) | agent:geo |
+| 2026-07-27 | [20260727-publish-firebase-deployment.md](20260727-publish-firebase-deployment.md) | agent:publish |
