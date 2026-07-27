@@ -56,8 +56,7 @@ def download(url: str, dest: Path) -> Path:
     resp = requests.get(url, timeout=600, stream=True)
     resp.raise_for_status()
     with open(dest, "wb") as fh:
-        for chunk in resp.iter_content(chunk_size=1 << 20):
-            fh.write(chunk)
+        fh.writelines(resp.iter_content(chunk_size=1 << 20))
     return dest
 
 
