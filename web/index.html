@@ -9,23 +9,26 @@
     html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
     #map { position: absolute; inset: 0; }
     #panel {
-      position: absolute; top: 12px; left: 12px; z-index: 1; max-width: 360px;
+      position: absolute; top: 12px; left: 12px; z-index: 1; max-width: 380px;
       background: rgba(255,255,255,.94); border-radius: 10px; padding: 14px 16px;
       box-shadow: 0 2px 10px rgba(0,0,0,.2); font-size: 13px; line-height: 1.45;
     }
     #panel h1 { font-size: 16px; margin: 0 0 6px; }
     #panel .disclaimer { color: #8a5a00; margin-top: 8px; }
+    #legend { margin-top: 8px; font-size: 12px; color: #444; }
     .popup h2 { font-size: 14px; margin: 0 0 6px; }
     .popup table { border-collapse: collapse; font-size: 12px; }
     .popup td { padding: 1px 6px 1px 0; }
     .popup .pos { color: #116329; } .popup .neg { color: #a40e26; }
+    .popup .pending { color: #8a5a00; }
   </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="panel">
   <h1>Property Opportunity Map</h1>
-  <div id="status">Loading scores…</div>
+  <div id="status">Loading…</div>
+  <div id="legend"></div>
   <div class="disclaimer">
     Research decision-support, <strong>not financial advice</strong>. Every
     forecast carries uncertainty; see the project README and docs/limitations.md.
@@ -36,12 +39,56 @@
 const map = new maplibregl.Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  center: [3.0, 43.6],   // Occitanie pilot area
-  zoom: 7
+  center: [3.0, 43.6],   // Hérault pilot area
+  zoom: 8
 });
 map.addControl(new maplibregl.NavigationControl());
 
-function popupHtml(p) {
+// Three-tier data chain:
+//   1. opportunities.geojson — Gate-C model scores (none published yet)
+//   2. communes.geojson      — real descriptive DVF/INSEE data, no forecasts
+//   3. opportunities.sample.geojson — synthetic demo points
+const MODES = {
+  scores: {
+    url: 'data/opportunities.geojson',
+    banner: 'Live scoring output.',
+    color: ['interpolate', ['linear'], ['get', 'opportunity_score'],
+      0, '#2166ac', 40, '#f7f7f7', 70, '#f4a582', 100, '#b2182b'],
+    legend: 'Colour: opportunity score 0–100'
+  },
+  descriptive: {
+    url: 'data/communes.geojson',
+    banner: 'Real DVF + INSEE data for Hérault communes (vintage 2024). ' +
+      '<strong>Descriptive only — no forecasts yet.</strong> The appreciation ' +
+      'model has not passed its backtest gate, so no opportunity scores are published.',
+    color: ['interpolate', ['linear'], ['get', 'median_price_m2'],
+      1000, '#2c7fb8', 2500, '#a6d96a', 4000, '#fdae61', 6000, '#d7191c'],
+    legend: 'Colour: real median €/m², 2024 transactions'
+  },
+  sample: {
+    url: 'data/opportunities.sample.geojson',
+    banner: 'Showing <strong>sample data</strong> until the first real scoring run is published.',
+    color: ['interpolate', ['linear'], ['get', 'opportunity_score'],
+      0, '#2166ac', 40, '#f7f7f7', 70, '#f4a582', 100, '#b2182b'],
+    legend: 'Colour: opportunity score 0–100 (synthetic)'
+  }
+};
+
+function popupHtml(p, mode) {
+  if (mode === 'descriptive') {
+    return `<div class="popup">
+      <h2>Commune ${p.unit_id} (Hérault)</h2>
+      <table>
+        <tr><td>Median price (2024)</td><td>€${Math.round(p.median_price_m2)}/m²</td></tr>
+        <tr><td>Transactions (2024)</td><td>${p.annual_transactions}</td></tr>
+        <tr><td>Population (RP2021)</td><td>${Math.round(p.population)}</td></tr>
+        <tr><td>Working-age share (15–59)</td><td>${Math.round(p.working_age_share * 100)}%</td></tr>
+        <tr><td>Vacancy rate</td><td>${p.vacancy_rate}%</td></tr>
+        <tr><td>Data known as of</td><td>${p.known_as_of}</td></tr>
+      </table>
+      <div class="pending">Forecast: pending — model stage not complete.</div>
+    </div>`;
+  }
   const list = (x) => { try { return JSON.parse(x); } catch { return x ? [x] : []; } };
   const pos = list(p.drivers_positive).map(d => `<li class="pos">${d}</li>`).join('');
   const neg = list(p.drivers_risk).map(d => `<li class="neg">${d}</li>`).join('');
@@ -61,25 +108,27 @@ function popupHtml(p) {
 }
 
 map.on('load', async () => {
-  let url = 'data/opportunities.geojson';
-  let resp = await fetch(url);
-  if (!resp.ok) {
-    url = 'data/opportunities.sample.geojson';
-    resp = await fetch(url);
-    document.getElementById('status').innerHTML =
-      'Showing <strong>sample data</strong> until the first real scoring run is published.';
-  } else {
-    document.getElementById('status').textContent = 'Live scoring output.';
+  let mode = null, data = null;
+  for (const candidate of ['scores', 'descriptive', 'sample']) {
+    try {
+      const resp = await fetch(MODES[candidate].url);
+      if (resp.ok) { mode = candidate; data = await resp.json(); break; }
+    } catch { /* try next */ }
   }
-  const data = await resp.json();
+  if (!mode) {
+    document.getElementById('status').textContent = 'No data files reachable.';
+    return;
+  }
+  document.getElementById('status').innerHTML = MODES[mode].banner;
+  document.getElementById('legend').textContent =
+    `${MODES[mode].legend} · ${data.features.length} points`;
 
   map.addSource('scores', { type: 'geojson', data });
   map.addLayer({
     id: 'scores', type: 'circle', source: 'scores',
     paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 12, 14],
-      'circle-color': ['interpolate', ['linear'], ['get', 'opportunity_score'],
-        0, '#2166ac', 40, '#f7f7f7', 70, '#f4a582', 100, '#b2182b'],
+      'circle-color': MODES[mode].color,
       'circle-opacity': 0.75,
       'circle-stroke-width': 1, 'circle-stroke-color': '#555'
     }
@@ -88,7 +137,7 @@ map.on('load', async () => {
   map.on('click', 'scores', (e) => {
     new maplibregl.Popup({ maxWidth: '340px' })
       .setLngLat(e.lngLat)
-      .setHTML(popupHtml(e.features[0].properties))
+      .setHTML(popupHtml(e.features[0].properties, mode))
       .addTo(map);
   });
   map.on('mouseenter', 'scores', () => map.getCanvas().style.cursor = 'pointer');
