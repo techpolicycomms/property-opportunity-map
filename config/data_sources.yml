@@ -9,15 +9,33 @@ dvf:
   known_defects:
     - "excludes some sale types; reporting lag of months"
     - "Alsace-Moselle historically limited coverage"
+    - "official data.gouv listing is a rolling ~5-year window; older years drop off"
 
 dvf_geo:
   name: DVF géolocalisé (DVF+)
   url: https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres-geolocalisees/
   api: https://www.data.gouv.fr/api/1/datasets/demandes-de-valeurs-foncieres-geolocalisees/
+  mirror_index: https://files.data.gouv.fr/geo-dvf/latest/csv/
+  mirror_department_pattern: https://files.data.gouv.fr/geo-dvf/latest/csv/{year}/departements/{dept}.csv.gz
+  verified_as_of: "2026-07-27"
+  verified_years: [2021, 2022, 2023, 2024, 2025]
   licence: "Licence Ouverte 2.0 (Etalab)"
   update_frequency: biannual
   known_defects:
     - "geolocation quality varies; verify against BAN"
+    - "latest mirror is a rolling window; 2019–2020 department CSVs 404 as of 2026-07-27"
+
+dvf_raw_archive:
+  name: Historical DGFiP raw DVF (cquest mirror of rolled-off years)
+  url: https://data.cquest.org/dgfip_dvf/202404/
+  file_pattern: https://data.cquest.org/dgfip_dvf/202404/valeursfoncieres-{year}.txt
+  known_as_of: "2024-04-05"
+  licence: "Licence Ouverte 2.0 (Etalab) — same underlying DGFiP data"
+  update_frequency: "frozen snapshot (April 2024 release)"
+  known_defects:
+    - "not geolocated (lon/lat null until BAN/parcelle join)"
+    - "pipe-separated French decimal format; no Etalab id_mutation (synthetic ids used)"
+    - "community mirror, not an official data.gouv.fr resource"
 
 insee:
   name: INSEE municipal demographics & employment
