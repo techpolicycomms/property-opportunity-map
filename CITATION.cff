@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Property Opportunity Map: an open spatial forecasting system for European housing"
+type: software
+license: MIT
+repository-code: "https://github.com/techpolicycomms/property-opportunity-map"
+abstract: >-
+  An open, reproducible, point-in-time spatial forecasting system that
+  identifies affordable European locations likely to outperform their
+  national housing market over 5-20 year horizons, combining transaction
+  data, accessibility change, demographics, supply constraints and risk.

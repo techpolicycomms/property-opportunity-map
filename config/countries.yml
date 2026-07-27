@@ -1,0 +1,36 @@
+# Country rollout plan. Phase gating per AGENTS.md §7.
+active_phase: 1
+
+france:
+  phase: 1
+  status: pilot
+  transaction_source: dvf          # see data_sources.yml
+  admin_units: [commune, departement, region]
+  pilot_regions:
+    - name: Occitanie (Mediterranean corridor)
+      departments: ["34", "11", "66", "30"]
+      rationale: Mediterranean affordability + LGV/TEN-T corridor exposure
+    - name: Provence hinterland
+      departments: ["83", "84"]
+      rationale: priced-out demand spillover from the coast
+    - name: Nouvelle-Aquitaine secondary cities
+      departments: ["16", "17", "87"]
+      rationale: LGV Sud-Europe-Atlantique case studies
+  budget_eur: [50000, 200000]
+
+italy:
+  phase: 3
+  status: planned
+  transaction_source: omi_zones    # zone intervals, not transactions
+  note: national adapter required; do not force into DVF schema
+
+spain:
+  phase: 3
+  status: planned
+  transaction_source: mixed        # cadastre + registries + listings
+  note: completed-sale prices less openly harmonised than DVF
+
+eu_wide:
+  phase: 4
+  status: planned
+  role: broad opportunity-corridor discovery via harmonised EU sources

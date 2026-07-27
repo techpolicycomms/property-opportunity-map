@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "name": "SYNTHETIC SAMPLE — not model output",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [3.8767, 43.6108] },
+      "properties": {
+        "unit_id": "SAMPLE Montpellier periphery",
+        "known_as_of": "2026-01-01",
+        "median_price_m2": 2900,
+        "annual_transactions": 4200,
+        "pred_cagr_10y_p10": 1.2, "pred_cagr_10y_p50": 3.1, "pred_cagr_10y_p90": 5.4,
+        "expected_excess_return_10y": 0.8,
+        "opportunity_score": 55,
+        "drivers_positive": "[\"sample: population inflow\"]",
+        "drivers_risk": "[\"sample: already partially priced in\"]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [3.2156, 43.3442] },
+      "properties": {
+        "unit_id": "SAMPLE Béziers corridor",
+        "known_as_of": "2026-01-01",
+        "median_price_m2": 1620,
+        "annual_transactions": 900,
+        "pred_cagr_10y_p10": 0.5, "pred_cagr_10y_p50": 3.5, "pred_cagr_10y_p90": 6.8,
+        "expected_excess_return_10y": 1.4,
+        "opportunity_score": 72,
+        "drivers_positive": "[\"sample: improving rail accessibility\", \"sample: price discount vs comparable coastal cities\"]",
+        "drivers_risk": "[\"sample: heat and water stress\", \"sample: weak liquidity outside core\"]"
+      }
+    }
+  ]
+}

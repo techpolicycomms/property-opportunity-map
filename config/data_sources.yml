@@ -1,0 +1,67 @@
+# Registry of data sources. Gate A (AGENTS.md): ingestion PRs must keep
+# licence, update frequency and known defects current here.
+
+dvf:
+  name: Demandes de Valeurs Foncières (raw)
+  url: https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres/
+  licence: "Licence Ouverte 2.0 (Etalab)"
+  update_frequency: biannual
+  known_defects:
+    - "excludes some sale types; reporting lag of months"
+    - "Alsace-Moselle historically limited coverage"
+
+dvf_geo:
+  name: DVF géolocalisé (DVF+)
+  url: https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres-geolocalisees/
+  api: https://www.data.gouv.fr/api/1/datasets/demandes-de-valeurs-foncieres-geolocalisees/
+  licence: "Licence Ouverte 2.0 (Etalab)"
+  update_frequency: biannual
+  known_defects:
+    - "geolocation quality varies; verify against BAN"
+
+insee:
+  name: INSEE municipal demographics & employment
+  url: https://www.insee.fr/
+  licence: "open with attribution"
+  update_frequency: annual
+
+ban:
+  name: Base Adresse Nationale geocoding API
+  url: https://adresse.data.gouv.fr/
+  licence: "Licence Ouverte 2.0"
+
+eurostat_hpi:
+  name: Eurostat house price index
+  url: https://ec.europa.eu/eurostat/web/housing
+  licence: "Eurostat free reuse with attribution"
+  update_frequency: quarterly
+
+gisco:
+  name: Eurostat GISCO boundaries, GEOSTAT grids, degree of urbanisation
+  url: https://ec.europa.eu/eurostat/web/gisco
+  licence: "Eurostat free reuse with attribution"
+
+tentec:
+  name: TENtec / TEN-T corridor and project information
+  url: https://ec.europa.eu/transport/infrastructure/tentec/tentec-portal/
+  licence: "European Commission reuse"
+  note: "project stage (proposed/funded/contracted/under construction) is the key field"
+
+arcepe_fibre:
+  name: ARCEP fibre/very-high-capacity coverage (France)
+  url: https://www.arcep.fr/
+  licence: "open data"
+  phase: 1
+
+eea_flood:
+  name: EEA flood-prone areas & climate risk typologies
+  url: https://www.eea.europa.eu/en/analysis/maps-and-charts/
+  licence: "EEA standard reuse"
+  phase: 1
+
+espon_house4all:
+  name: ESPON HOUSE4ALL harmonised housing-price mapping
+  url: https://www.espon.eu/house4all
+  licence: "ESPON reuse terms"
+  phase: 4
+  note: "methodology reference; affordability focus, not outperformance"

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Working data — never commit raw or processed datasets
+data/raw/
+data/interim/
+data/processed/
+!data/**/.gitkeep
+outputs/geoparquet/
+outputs/pmtiles/
+outputs/geojson/
+!outputs/**/.gitkeep
+
+# Keep small public samples
+!data/samples/
+!web/data/
+
+# Notebooks checkpoint noise
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

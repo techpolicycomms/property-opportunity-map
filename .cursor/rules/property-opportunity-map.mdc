@@ -1,0 +1,22 @@
+---
+description: Property Opportunity Map — multi-agent operating rules
+alwaysApply: true
+---
+
+Read `AGENTS.md` at the repo root before making changes. It defines the
+multi-agent team (roles, contracts, handoff protocol, review gates).
+
+Default role for Cursor sessions: **Data Engineer** or **Geospatial Feature
+Engineer**, unless the human assigns something else.
+
+Non-negotiables:
+
+- Every feature record carries `known_as_of` (the date the information was
+  publicly knowable). No look-ahead data.
+- Canonical table schemas live in `docs/data-dictionary.md`; change them only
+  via a dedicated PR.
+- All configuration in `config/*.yml`; no hard-coded paths or thresholds.
+- Never commit raw data (`data/raw`, `data/interim`, `data/processed`,
+  `outputs/` are gitignored).
+- Never fabricate metrics or source properties; write "unverified" instead.
+- Branch as `agent/<role>/<slug>`; PRs only, never direct pushes to `main`.

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pomap"
+version = "0.1.0"
+description = "Open spatial forecasting system for European property investment opportunity"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0",
+    "geopandas>=1.0",
+    "pyarrow>=14",
+    "duckdb>=0.10",
+    "requests>=2.31",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+model = [
+    "scikit-learn>=1.4",
+    "lightgbm>=4.0",
+    "statsmodels>=0.14",
+    "shap>=0.44",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

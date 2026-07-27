@@ -1,0 +1,70 @@
+# Feature groups per docs/methodology.md. Weights are LEARNED, never hand-set.
+# 'implemented' flags are updated by the feature-engineering agent.
+
+groups:
+  A_demand:
+    description: Population and household trajectory
+    features:
+      pop_cagr_5y: { implemented: false }
+      net_migration_rate: { implemented: false }
+      working_age_share_delta: { implemented: false }
+      vacancy_rate: { implemented: false }
+      tourism_nights_per_capita: { implemented: false }
+
+  B_accessibility:
+    description: Accessibility CHANGE, not infrastructure presence
+    features:
+      jobs_reachable_45min: { implemented: false }
+      jobs_reachable_90min: { implemented: false }
+      rail_freq_daily: { implemented: false }
+      accessibility_delta_jobs: { implemented: false, note: "future − current reachable jobs" }
+      planned_project_stage: { implemented: false, note: "ordinal 0-4: proposed→operational" }
+      noise_severance_penalty: { implemented: false }
+
+  C_economy:
+    description: Change and convergence, not current income level
+    features:
+      emp_cagr_5y: { implemented: false }
+      business_creation_rate: { implemented: false }
+      wage_cagr_5y: { implemented: false }
+      sector_diversification: { implemented: false }
+
+  D_supply:
+    description: Supply elasticity — demand growth only bites when supply is constrained
+    features:
+      permits_per_1k: { implemented: false }
+      completions_per_1k: { implemented: false }
+      developable_land_share: { implemented: false }
+      planning_delay_months: { implemented: false }
+
+  E_valuation:
+    description: Cheap RELATIVE to fundamentals, not cheap in absolute terms
+    features:
+      median_price_m2: { implemented: false }
+      price_income_ratio: { implemented: false }
+      gross_yield: { implemented: false }
+      peer_discount: { implemented: false, note: "vs statistically matched municipalities" }
+      annual_transactions: { implemented: false }
+      ask_transaction_gap: { implemented: false }
+
+  F_amenities:
+    features:
+      schools_access: { implemented: false }
+      gp_access_min: { implemented: false }
+      green_space_share: { implemented: false }
+      air_pollution_pm25: { implemented: false }
+
+  G_digital:
+    features:
+      ftth_coverage: { implemented: false }
+      median_down_mbps: { implemented: false }
+      mobile_5g_coverage: { implemented: false }
+
+  H_risk:
+    description: Negative/constraint layer
+    features:
+      flood_zone_share: { implemented: false }
+      wildfire_risk: { implemented: false }
+      heat_stress_days: { implemented: false }
+      water_stress: { implemented: false }
+      dpe_liability_share: { implemented: false, note: "energy-performance retrofit liability" }

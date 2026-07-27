@@ -1,0 +1,38 @@
+# Model configuration. All scoring/science knobs live here — never in code.
+
+horizons_years: [5, 10, 20]
+
+targets:
+  primary: excess_cagr_10y_vs_national_hpi   # percentage points
+  secondary: [real_cagr_5y, real_cagr_10y]
+
+budget_eur: [50000, 200000]
+
+scoring:
+  # opportunity = expected_excess_return × confidence × investability − risk_penalty
+  confidence_from: ensemble_disagreement     # and backtest calibration
+  min_annual_transactions: 30                # below this, unit is 'insufficient evidence'
+  subscore_scale: [0, 100]
+
+uncertainty:
+  quantiles: [0.1, 0.5, 0.9]
+  method: quantile_gradient_boosting         # baseline; revisit after Gate B
+
+baseline:
+  fair_value:
+    algorithm: lightgbm
+    params:
+      objective: regression
+      num_leaves: 63
+      learning_rate: 0.05
+      feature_fraction: 0.8
+    target: log_price_per_m2
+  appreciation:
+    algorithm: lightgbm_quantile
+    hierarchical_fallback: commune → departement → region pooling
+
+backtest:
+  windows:
+    - { train_until: "2009-12-31", predict_from: "2010-01-01", evaluate_at: ["2015-01-01", "2020-01-01"] }
+    - { train_until: "2014-12-31", predict_from: "2015-01-01", evaluate_at: ["2020-01-01", "2025-01-01"] }
+  metrics: [spearman_excess_return, quantile_calibration, top_decile_hit_rate]

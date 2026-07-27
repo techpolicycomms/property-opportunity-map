@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Property Opportunity Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" />
+  <style>
+    html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
+    #map { position: absolute; inset: 0; }
+    #panel {
+      position: absolute; top: 12px; left: 12px; z-index: 1; max-width: 360px;
+      background: rgba(255,255,255,.94); border-radius: 10px; padding: 14px 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.2); font-size: 13px; line-height: 1.45;
+    }
+    #panel h1 { font-size: 16px; margin: 0 0 6px; }
+    #panel .disclaimer { color: #8a5a00; margin-top: 8px; }
+    .popup h2 { font-size: 14px; margin: 0 0 6px; }
+    .popup table { border-collapse: collapse; font-size: 12px; }
+    .popup td { padding: 1px 6px 1px 0; }
+    .popup .pos { color: #116329; } .popup .neg { color: #a40e26; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="panel">
+  <h1>Property Opportunity Map</h1>
+  <div id="status">Loading scores…</div>
+  <div class="disclaimer">
+    Research decision-support, <strong>not financial advice</strong>. Every
+    forecast carries uncertainty; see the project README and docs/limitations.md.
+  </div>
+</div>
+<script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<script>
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  center: [3.0, 43.6],   // Occitanie pilot area
+  zoom: 7
+});
+map.addControl(new maplibregl.NavigationControl());
+
+function popupHtml(p) {
+  const list = (x) => { try { return JSON.parse(x); } catch { return x ? [x] : []; } };
+  const pos = list(p.drivers_positive).map(d => `<li class="pos">${d}</li>`).join('');
+  const neg = list(p.drivers_risk).map(d => `<li class="neg">${d}</li>`).join('');
+  return `<div class="popup">
+    <h2>${p.unit_id}</h2>
+    <table>
+      <tr><td>Median price</td><td>€${Math.round(p.median_price_m2)}/m²</td></tr>
+      <tr><td>10y CAGR (p10/p50/p90)</td>
+          <td>${p.pred_cagr_10y_p10}% / ${p.pred_cagr_10y_p50}% / ${p.pred_cagr_10y_p90}%</td></tr>
+      <tr><td>Excess return vs national</td><td>+${p.expected_excess_return_10y} pp</td></tr>
+      <tr><td>Transactions/yr</td><td>${p.annual_transactions}</td></tr>
+      <tr><td>Opportunity score</td><td><strong>${p.opportunity_score}</strong>/100</td></tr>
+      <tr><td>Known as of</td><td>${p.known_as_of}</td></tr>
+    </table>
+    <ul>${pos}</ul><ul>${neg}</ul>
+  </div>`;
+}
+
+map.on('load', async () => {
+  let url = 'data/opportunities.geojson';
+  let resp = await fetch(url);
+  if (!resp.ok) {
+    url = 'data/opportunities.sample.geojson';
+    resp = await fetch(url);
+    document.getElementById('status').innerHTML =
+      'Showing <strong>sample data</strong> until the first real scoring run is published.';
+  } else {
+    document.getElementById('status').textContent = 'Live scoring output.';
+  }
+  const data = await resp.json();
+
+  map.addSource('scores', { type: 'geojson', data });
+  map.addLayer({
+    id: 'scores', type: 'circle', source: 'scores',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 12, 14],
+      'circle-color': ['interpolate', ['linear'], ['get', 'opportunity_score'],
+        0, '#2166ac', 40, '#f7f7f7', 70, '#f4a582', 100, '#b2182b'],
+      'circle-opacity': 0.75,
+      'circle-stroke-width': 1, 'circle-stroke-color': '#555'
+    }
+  });
+
+  map.on('click', 'scores', (e) => {
+    new maplibregl.Popup({ maxWidth: '340px' })
+      .setLngLat(e.lngLat)
+      .setHTML(popupHtml(e.features[0].properties))
+      .addTo(map);
+  });
+  map.on('mouseenter', 'scores', () => map.getCanvas().style.cursor = 'pointer');
+  map.on('mouseleave', 'scores', () => map.getCanvas().style.cursor = '');
+});
+</script>
+</body>
+</html>
